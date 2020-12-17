@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+
+  db:
+    build: ./database/
+    restart: always
+    volumes:
+     - ./database/db:/var/lib/postgresql/data
+     
+
+  adminer:
+     image: adminer
+     restart: always
+     ports:
+      - 8080:8080
+      
+  spark:
+    build: ./app/
+    ports:
+      - "8888:8888"
+      - "4040-4080:4040-4080"
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks/
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+
+
