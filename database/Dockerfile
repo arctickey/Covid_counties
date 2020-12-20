@@ -1,9 +1,9 @@
 FROM postgres:latest
 
 
-ENV POSTGRES_PASSWORD=secret
-ENV POSTGRES_USER=username
-ENV POSTGRES_DB=database
+ENV POSTGRES_PASSWORD=admin
+ENV POSTGRES_USER=admin
+ENV POSTGRES_DB=raw
 
 
 
