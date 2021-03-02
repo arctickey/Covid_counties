@@ -20,6 +20,22 @@ def dropTable(name):
     cur.execute(sql)
     conn.commit()
 
+def state(x):
+    x = str(x)
+    if len(x) ==1:
+        x = '0'+ x
+    return x
+def county(x):
+    x = str(x)
+    if len(x)==1:
+        x = '00'+ x
+    elif len(x)==2:
+        x = '0' + x
+    return x
+state_convert = F.udf(lambda x: state(x)) 
+county_convert = F.udf(lambda x: county(x)) 
+
+
 engine = create_engine('postgresql+psycopg2://username:secret@db:5432/database')
 conn = psycopg2.connect(database="database",user="username", password="secret",host="db", port="5432")
 cur = conn.cursor()
@@ -30,7 +46,7 @@ tables = []
 for table in cur.fetchall():
     tables.append(table[0])
     
-    
+
 base = spark.read \
     .format("jdbc") \
     .option("url", "jdbc:postgresql://db:5432/database")\
@@ -56,7 +72,6 @@ base.write \
     .save()
 
 
-
 education = spark.read \
     .format("jdbc") \
     .option("url", "jdbc:postgresql://db:5432/database")\
@@ -65,6 +80,11 @@ education = spark.read \
     .option("password", "secret") \
     .option("driver", "org.postgresql.Driver") \
     .load()
+
+
+education = education.withColumn("State_FIPS", state_convert(F.col("State_FIPS")))
+education = education.withColumn("County_FIPS", county_convert(F.col("County_FIPS")))
+
 
 col_list = ['State_Fips','County_FIPS']
 education = education.withColumn('FIPS',F.concat(*col_list))
@@ -81,8 +101,6 @@ education.write \
     .save()
 
 
-
-
 poverty = spark.read \
     .format("jdbc") \
     .option("url", "jdbc:postgresql://db:5432/database")\
@@ -91,8 +109,8 @@ poverty = spark.read \
     .option("password", "secret") \
     .option("driver", "org.postgresql.Driver") \
     .load()
-
-
+poverty= poverty.withColumn("State_FIPS", state_convert(F.col("State_FIPS")))
+poverty = poverty.withColumn("County_FIPS", county_convert(F.col("County_FIPS")))
 col_list = ['State_Fips','County_FIPS']
 poverty= poverty.withColumn('FIPS',F.concat(*col_list))
 columns_to_drop = ['Geo_Name','State_Fips','County_Fips']
@@ -108,9 +126,6 @@ poverty.write \
     .save()
 
 
-
-
-
 population = spark.read \
     .format("jdbc") \
     .option("url", "jdbc:postgresql://db:5432/database")\
@@ -121,20 +136,7 @@ population = spark.read \
     .load()
 
 col_list = ['STATE','COUNTY']
-def state(x):
-    x = str(x)
-    if len(x) ==1:
-        x = '0'+ x
-    return x
-def county(x):
-    x = str(x)
-    if len(x)==1:
-        x = '00'+ x
-    elif len(x)==2:
-        x = '0' + x
-    return x
-state_convert = F.udf(lambda x: state(x)) 
-county_convert = F.udf(lambda x: county(x)) 
+
 
 population = population.withColumn("STATE", state_convert(F.col("STATE")))
 population = population.withColumn("COUNTY", county_convert(F.col("COUNTY")))
@@ -154,8 +156,6 @@ population.write \
     .option("password", "secret") \
     .option("driver", "org.postgresql.Driver") \
     .save()
-
-
 
 
 daily = spark.read \
@@ -180,7 +180,6 @@ daily.write \
     .option("password", "secret") \
     .option("driver", "org.postgresql.Driver") \
     .save()
-
 
 
 for table in tables:
