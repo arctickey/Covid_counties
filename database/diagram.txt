@@ -1,0 +1,63 @@
+
+Table Base{
+  FIPS string
+  date string
+  county string
+  state string 
+  cases int
+  deaths int
+}
+
+Table Daily {
+  FIPS string
+  date string
+  state string 
+  positiveIncrease int
+  death int
+}
+
+Table Population{
+ FIPS string
+  CTYNAME string
+ TOT_POP float
+ TOT_MALE float
+ TOT_FEMALE float
+ WA_MALE float
+ WA_FEMALE float
+ BA_MALE float
+ BA_FEMALE float
+ IA_MALE float
+ IA_FEMALE float
+ AA_MALE float
+ AA_FEMALE float
+ H_MALE float
+ H_FEMALE float
+
+}
+
+Table Education{
+  FIPS string
+  25_Plus_Pop float
+  Bach_Plus float
+  Hs_Plus float
+  Advanced_Degree float
+  
+}
+
+Table Poverty{
+  FIPS string
+  Total_Pop float
+ Child_Pop float
+ Elder_Pop float
+ Pov_Rate float
+ Pov_Rate_Child float
+ Pov_Rate_Elder float
+}
+
+
+
+Ref: Base.FIPS > Education.FIPS
+Ref: Base.FIPS > Population.FIPS
+Ref: Base.FIPS > Poverty.FIPS
+Ref: Base.FIPS > Daily.FIPS
+
