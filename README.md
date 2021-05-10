@@ -6,4 +6,4 @@ My aim in this project is to analyse and visualise amount of covid cases in each
 <a/>
 The whole app is containerized with Docker.
 
-![Diagram](/notebooks/plots/cases_by_state.html)
+![Diagram](/notebooks/plots/states.png)
