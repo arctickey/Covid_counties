@@ -32,8 +32,15 @@ def county(x):
     elif len(x)==2:
         x = '0' + x
     return x
+
+def fips(x):
+    x = str(x)
+    if len(x)==4:
+        x = '0'+x
+    return x
 state_convert = F.udf(lambda x: state(x)) 
 county_convert = F.udf(lambda x: county(x)) 
+fips_convert = F.udf(lambda x: fips(x))  
 
 
 engine = create_engine('postgresql+psycopg2://username:secret@db:5432/database')
@@ -60,6 +67,7 @@ base = spark.read \
 base = base.withColumn("fips", base["fips"].cast(IntegerType()))
 base = base.withColumn("fips", base["fips"].cast(StringType()))
 base = base.withColumnRenamed('fips','FIPS')
+base = base.withColumn('FIPS',fips_convert(F.col('FIPS')))
 base.count()
 
 base.write \
@@ -147,6 +155,7 @@ population = population.filter(population.AGEGRP=='0')
 selected = ['CTYNAME','TOT_POP','TOT_MALE','TOT_FEMALE','WA_MALE','WA_FEMALE','BA_MALE',
 'BA_FEMALE','IA_MALE','IA_FEMALE','AA_MALE','AA_FEMALE','H_MALE','H_FEMALE','FIPS']
 population = population[selected]
+population = population.withColumn('State_Code',population['FIPS'].substr(1,2))
 population.count()
 population.write \
     .format("jdbc") \
